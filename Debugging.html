@@ -1,0 +1,88 @@
+<!doctype html>
+<html>
+<head>
+<meta charset='UTF-8'><meta name='viewport' content='width=device-width initial-scale=1'>
+<title></title></head>
+<body><p>I&#39;m experiencing the same error, but my OLED display doesn&#39;t show anything (never has). </p>
+<h2>Debugging</h2>
+<p>Running Notebooks/basic_motion.ipynb</p>
+<pre><code>from jetbot import Robot # imports fine
+robot = Robot() # throws error pasted at the bottom of this post
+</code></pre>
+<ul>
+<li>checked all of the connections</li>
+<li>tried removing/bypassing the OLED from the daisy chain</li>
+<li>tried the other plugs on the qwiic pHat and OLED boards</li>
+
+</ul>
+<h2>Multimeter checks:</h2>
+<ul>
+<li><p>pHat is outputting 5V to motor controller and motor controller receives 5V. check</p>
+</li>
+<li><p>OLED board has 3V3 and ground pin holes - with 3.3V across them. check</p>
+<ul>
+<li>Qwiic connector on OLED input and output both have 2.3V on Blue and Yellow wires and 3.3V on Red. power check. I assume the Blue and Yellow are supposed to be for serial communication, so I don&#39;t know if 2.3V makes sense on those wires.</li>
+
+</ul>
+</li>
+
+</ul>
+<pre><code>      - 3.3 2.3 2.3  Volts
+      |  |  |  |
+    +------------+
+    | Connector  |
+    +------------+
+      Ba R  Bu Y
+</code></pre>
+<h3>Thoughts</h3>
+<p>USB Wifi device seems to be struggling to function as well. I&#39;ve been using ethernet to connect. Maybe this is an indication that there&#39;s a power problem? I&#39;m using the battery at full charge. I also used a 5A wall plug to test as well but with the same behavior. Tried re-flashing the SD card as well with the sparkfun provided image but got the same behavior.
+Everything has a reasonable voltage, but my multimeter can&#39;t measure current so I can&#39;t check much beyond that. I set the jetson power mode to the 5V version.
+Bad OLED board? I tried removing it from the robot and received the same error. But I can&#39;t tell from the error message whether or not the OLED board is needed for the <code>Robot</code> class.
+Any thoughts before I buy a replacement OLED board?</p>
+<h2>basic_motion.ipynb Error</h2>
+<pre><code>OSError                                   Traceback (most recent call last)
+&lt;ipython-input-2-b418ad9f6ab3&gt; in &lt;module&gt;
+----&gt; 1 robot = Robot()
+
+/usr/local/lib/python3.6/dist-packages/jetbot-0.4.0-py3.6.egg/jetbot/robot.py in __init__(self, *args, **kwargs)
+     43         self.left_motor = Motor(self.motor_driver, channel=self.left_motor_channel, alpha=self.left_motor_alpha)
+     44         self.right_motor = Motor(self.motor_driver, channel=self.right_motor_channel, alpha=self.right_motor_alpha)
+---&gt; 45         self.motor_driver.enable()
+     46 
+     47     def set_motors(self, left_speed, right_speed):
+
+/usr/local/lib/python3.6/dist-packages/qwiic_scmd.py in enable(self)
+    335 
+    336         &quot;&quot;&quot;
+--&gt; 337         self._i2c.writeByte(self.address, self.SCMD_DRIVER_ENABLE, 0x01)
+    338 
+    339     def disable(self):
+
+/usr/local/lib/python3.6/dist-packages/qwiic_i2c/linux_i2c.py in writeByte(self, address, commandCode, value)
+    224         def writeByte(self, address, commandCode, value):
+    225 
+--&gt; 226                 return self.i2cbus.write_byte_data(address, commandCode, value)
+    227 
+    228         def writeBlock(self, address, commandCode, value):
+
+/usr/local/lib/python3.6/dist-packages/smbus2/smbus2.py in write_byte_data(self, i2c_addr, register, value, force)
+    432         )
+    433         msg.data.contents.byte = value
+--&gt; 434         ioctl(self.fd, I2C_SMBUS, msg)
+    435 
+    436     def read_word_data(self, i2c_addr, register, force=None):
+
+OSError: [Errno 121] Remote I/O error
+</code></pre>
+<h2>Sample OLED.ipynb Error</h2>
+<p>Sparkfun also has some Qwiic samples.
+Running:
+<code>my_oled = qwiic_micro_oled.QwiicMicroOled()</code>
+and then checking the connection: 
+<code>if not my_oled.connected:</code>
+shows the device as not connected.</p>
+<pre><code>Error connecting to Device: 3D, [Errno 5] Input/output error
+The Qwiic Micro OLED device isn&#39;t connected to the system. Please check your connection
+</code></pre>
+</body>
+</html>

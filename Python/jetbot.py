@@ -1,16 +1,16 @@
-from ReliableCommunication import Client
+from .ReliableCommunication import Client
 
 class Robot:
 
     def __init__(self):
+        self.left_motor = Motor(self)
+        self.right_motor = Motor(self)
+
         self.conn = Client("127.0.0.1", 6000, autoReconnect=True)
-        self.conn.connect()
         self.conn.add_onconnect_callback(self.__onConnStart)
         self.conn.add_onclose_callback(self.__onConnClose)
         self.conn.add_onmessage_callback(self.__onMessage)
-
-        self.left_motor = Motor()
-        self.right_motor = Motor()
+        self.conn.connect()
 
     def left(self, speed=0.0):
         ''' Sets the left motor to rotate at a speed '''
@@ -32,14 +32,14 @@ class Robot:
             "target": motorName,
             "power": power
         }
-        self.conn.Send(msg)
+        self.conn.send(msg)
     
     def stop(self):
         ''' Stops all motors '''
         msg = {
             "type": "stop"
         }
-        self.conn.Send(msg)
+        self.conn.send(msg)
         self.left_motor.__value = 0
         self.right_motor.__value = 0
 
